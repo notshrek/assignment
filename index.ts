@@ -1,8 +1,14 @@
 import express from "express";
 import router from "./routes";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger";
 
 const app = express();
 const port = 3000;
+
+// add swagger api docs route
+app.use("/docs", swaggerUi.serve);
+app.get("/docs", swaggerUi.setup(swaggerDocument));
 
 app.use("/api/v1", router);
 
