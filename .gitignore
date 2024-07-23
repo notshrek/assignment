@@ -1,0 +1,11 @@
+# npm
+node_modules/
+
+# env
+.env
+
+# ts
+dist/
+
+# misc
+.DS_Store
