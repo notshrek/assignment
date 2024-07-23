@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import { authMiddleware } from "./middlewares";
 
 const router = express.Router();
 
@@ -113,7 +114,7 @@ router.get("/users", (req, res) => {
  *       5XX:
  *         description: Server-side error.
  */
-router.post("/users", (req, res) => {
+router.post("/users", authMiddleware, (req, res) => {
   res.send("users");
 });
 
