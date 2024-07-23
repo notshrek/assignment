@@ -1,4 +1,5 @@
 import express from "express";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
@@ -114,6 +115,46 @@ router.get("/users", (req, res) => {
  */
 router.post("/users", (req, res) => {
   res.send("users");
+});
+
+/**
+ * @openapi
+ * /api/v1/login:
+ *   post:
+ *     summary: Generate a JWT token
+ *     description: Generates a basic JWT token with role set to admin and expiry set to 5 minutes.
+ *     tags:
+ *        - Authentication
+ *     requestBody:
+ *       description: Content of the request body are ignored.
+ *       content:
+ *          application/json:
+ *             schema:
+ *                type: object
+ *     responses:
+ *       200:
+ *         description: An object containing the generated JWT token.
+ *         content:
+ *            application/json:
+ *               schema:
+ *                  type: object
+ *                  properties:
+ *                     token:
+ *                        type: string
+ *               example:
+ *                  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJleHBpcmVzX2F0IjoxNzIxNzY3NjQ3MDA3LCJpYXQiOjE3MjE3NjczNDd9.PoxLRlIGFO1m5j5F4JDkfFITxg21y7BXEnEHAr1LI3s'
+ *       5XX:
+ *         description: Server-side error.
+ */
+router.post("/login", (req, res) => {
+  const payload = {
+    role: "admin",
+    expires_at: Date.now() + 300 * 1000,
+  };
+
+  jwt.sign(payload, process.env.JWT_SECRET!, (error, data) => {
+    res.json({ token: data });
+  });
 });
 
 export default router;
