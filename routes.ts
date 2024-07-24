@@ -115,6 +115,8 @@ router.get("/users", (req, res) => {
  *         description: Malformed request.
  *       401:
  *         description: Unauthorized.
+ *       403:
+ *         description: Token is fine but expired or role is not admin.
  *       409:
  *         description: Username already exists.
  *       5XX:
