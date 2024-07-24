@@ -1,7 +1,12 @@
-import express from "express";
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "./middlewares";
 import { User } from "./mongodb";
+import { body, matchedData, validationResult } from "express-validator";
 
 const router = express.Router();
 
@@ -115,15 +120,33 @@ router.get("/users", (req, res) => {
  *       5XX:
  *         description: Server-side error.
  */
-router.post("/users", authMiddleware, async (req, res, next) => {
-  try {
-    const user = new User({ username: req.body.username });
-    const result = await user.save();
-    res.json({ result });
-  } catch (e) {
-    next(e);
+
+// checks request body to make sure username is not empty and sanitizes the input
+router.post(
+  "/users",
+  authMiddleware,
+  [
+    body("username")
+      .notEmpty()
+      .withMessage("Username is empty.")
+      .trim()
+      .escape(),
+  ],
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: "Username is invalid." });
+      }
+      const sanitizedUsername = matchedData(req);
+      const user = new User({ username: sanitizedUsername.username });
+      const result = await user.save();
+      res.json({ result });
+    } catch (e) {
+      next(e);
+    }
   }
-});
+);
 
 /**
  * @openapi
