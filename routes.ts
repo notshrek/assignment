@@ -269,4 +269,90 @@ router.get("/users/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * /api/v1/users/{id}:
+ *   put:
+ *     summary: Update an existing user
+ *     description: Updates an existing user with the given ID. The value that can be updated is the username which must be passed in the request body.
+ *     security:
+ *        - BearerAuth: []
+ *     tags:
+ *        - Users
+ *     parameters:
+ *        - in: path
+ *          name: id
+ *          required: true
+ *          description: User ID.
+ *          schema:
+ *             type: string
+ *     requestBody:
+ *       description: Must be a json object containing the new username.
+ *       required: true
+ *       content:
+ *          application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                   username:
+ *                      type: string
+ *     responses:
+ *       204:
+ *         description: Successfully updated the user with the given ID.
+ *       400:
+ *         description: Malformed request.
+ *       401:
+ *         description: Unauthorized.
+ *       403:
+ *         description: Token is fine but expired or role is not admin.
+ *       404:
+ *         description: User with this ID not found.
+ *       5XX:
+ *         description: Server-side error.
+ */
+
+// checks request body to make sure username is not empty and sanitizes the input
+router.put(
+  "/users/:id",
+  authMiddleware,
+  [
+    body("username")
+      .notEmpty()
+      .withMessage("Username is empty.")
+      .trim()
+      .escape(),
+  ],
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // check if the given id is a valid object id
+      if (!mongoose.Types.ObjectId.isValid(req.params.id ?? "")) {
+        return res.status(400).json({ message: "Invalid ID." });
+      }
+
+      // make sure validation passed successfully
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: "Username is invalid." });
+      }
+      const sanitizedUsername = matchedData(req);
+
+      // update the document and check if it was successful
+      const result = await User.findByIdAndUpdate(req.params.id, {
+        username: sanitizedUsername.username,
+      });
+
+      // if the update result is null then the document does not exist
+      if (!result) {
+        return res
+          .status(404)
+          .json({ errors: "User with given ID not found." });
+      }
+
+      res.status(204).send();
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
 export default router;
