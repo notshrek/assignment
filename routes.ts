@@ -41,7 +41,7 @@ const router = express.Router();
  *             default: "DESC"
  *     responses:
  *       200:
- *         description: An object containing a paginated array of all the users.
+ *         description: An object containing a paginated array of all the users ordered by joined_at.
  *         content:
  *            application/json:
  *               schema:
@@ -55,13 +55,15 @@ const router = express.Router();
  *                              username:
  *                                 type: string
  *                              joined_at:
- *                                 type: timestamp
+ *                                 type: datetime
  *               example:
  *                  result:
- *                     - username: 'John Doe'
- *                       joined_at: '1721762939542'
- *                     - username: 'Jane Doe'
- *                       joined_at: '1621762381895'
+ *                     - _id: 66a0a7e7362f3b1136cbb8f1
+ *                       username: 'John Doe'
+ *                       joined_at: '2024-07-24T07:06:15.012Z'
+ *                     - _id: 66a0a7e7362f4w5greh65jg5
+ *                       username: 'Jane Doe'
+ *                       joined_at: '2024-06-24T07:00:10.000Z'
  *       5XX:
  *         description: Server-side error.
  */
