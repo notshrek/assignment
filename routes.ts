@@ -115,10 +115,14 @@ router.get("/users", (req, res) => {
  *       5XX:
  *         description: Server-side error.
  */
-router.post("/users", authMiddleware, async (req, res) => {
-  const user = new User({ username: req.body.username });
-  const result = await user.save();
-  res.json({ result });
+router.post("/users", authMiddleware, async (req, res, next) => {
+  try {
+    const user = new User({ username: req.body.username });
+    const result = await user.save();
+    res.json({ result });
+  } catch (e) {
+    next(e);
+  }
 });
 
 /**
