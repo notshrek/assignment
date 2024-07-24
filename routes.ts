@@ -14,6 +14,7 @@ const router = express.Router();
  * @openapi
  * /api/v1/users:
  *   get:
+ *     summary: Get a list of all users
  *     description: Returns a paginated array of all the users. The response can be transformed by the supported query parameters.
  *     tags:
  *        - Users
