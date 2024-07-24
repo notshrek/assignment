@@ -12,10 +12,14 @@ async function init() {
 }
 
 // define userSchema
-const userSchema = new mongoose.Schema({
-  username: String,
-  joined_at: Number,
-});
+// disable version key as it is not needed for this schema
+const userSchema = new mongoose.Schema(
+  {
+    username: String,
+    joined_at: { type: Date, default: Date.now },
+  },
+  { versionKey: false }
+);
 
 // compile userSchema into a model
 export const User = mongoose.model("User", userSchema);
