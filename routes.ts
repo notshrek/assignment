@@ -65,8 +65,17 @@ const router = express.Router();
  *       5XX:
  *         description: Server-side error.
  */
-router.get("/users", (req, res) => {
-  res.send("users");
+router.get("/users", async (req, res) => {
+  // convert order parameter to lower case
+  req.query.order = req.query.order?.toString().toLowerCase();
+
+  // if query params are not valid use the default values
+  const result = await User.find()
+    .sort({ joined_at: req.query.order === "asc" ? "asc" : "desc" })
+    .skip(isNaN(Number(req.query.offset)) ? 0 : Number(req.query.offset))
+    .limit(isNaN(Number(req.query.limit)) ? 10 : Number(req.query.limit));
+
+  res.json({ result });
 });
 
 /**
