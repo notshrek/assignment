@@ -6,6 +6,9 @@ import swaggerDocument from "./swagger";
 const app = express();
 const port = 3000;
 
+// parse request body as json
+app.use(express.json());
+
 // add swagger api docs route
 app.use("/docs", swaggerUi.serve);
 app.get("/docs", swaggerUi.setup(swaggerDocument));
