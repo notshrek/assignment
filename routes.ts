@@ -158,7 +158,7 @@ router.post(
       const sanitizedUsername = matchedData(req);
       const user = new User({ username: sanitizedUsername.username });
       const result = await user.save();
-      res.json({ result });
+      res.status(201).json({ result });
     } catch (e) {
       next(e);
     }
