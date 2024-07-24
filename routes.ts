@@ -1,6 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "./middlewares";
+import { User } from "./mongodb";
 
 const router = express.Router();
 
@@ -114,8 +115,10 @@ router.get("/users", (req, res) => {
  *       5XX:
  *         description: Server-side error.
  */
-router.post("/users", authMiddleware, (req, res) => {
-  res.send("users");
+router.post("/users", authMiddleware, async (req, res) => {
+  const user = new User({ username: req.body.username });
+  const result = await user.save();
+  res.json({ result });
 });
 
 /**
