@@ -3,6 +3,7 @@ import router from "./routes";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./swagger";
 import "./mongodb";
+import { errorMiddleware } from "./middlewares";
 
 const app = express();
 const port = 3000;
@@ -15,6 +16,7 @@ app.use("/docs", swaggerUi.serve);
 app.get("/docs", swaggerUi.setup(swaggerDocument));
 
 app.use("/api/v1", router);
+app.use(errorMiddleware);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
