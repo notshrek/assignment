@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 async function init() {
   // connect to the MongoDB database and exit the app if connection is unsuccessful
   try {
-    await mongoose.connect(process.env.MONGODB_URL!);
+    await mongoose.connect(process.env.MONGODB_URL!, { autoIndex: true });
   } catch (e) {
     console.error(e);
     process.exit(1);
@@ -15,7 +15,7 @@ async function init() {
 // disable version key as it is not needed for this schema
 const userSchema = new mongoose.Schema(
   {
-    username: String,
+    username: { type: String, unique: true },
     joined_at: { type: Date, default: Date.now },
   },
   { versionKey: false }
