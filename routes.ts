@@ -123,7 +123,7 @@ router.get("/users", async (req, res) => {
  *                              type: timestamp
  *               example:
  *                  result:
- *                     id: '9625d82e-3ad7-4633-95f5-49e4886ca3ef'
+ *                     id: '66a0a7e7362f3b1136cbb8f1'
  *                     username: 'John Doe'
  *                     joined_at: '1721762939542'
  *       400:
@@ -209,7 +209,7 @@ router.post("/login", (req, res) => {
  * @openapi
  * /api/v1/users/{id}:
  *   get:
- *     summary: Get a list of all users
+ *     summary: Get an existing user
  *     description: Returns an object containing information for the user with the given ID.
  *     tags:
  *        - Users
@@ -349,6 +349,83 @@ router.put(
       }
 
       res.status(204).send();
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+/**
+ * @openapi
+ * /api/v1/users/{id}:
+ *   delete:
+ *     summary: Delete an existing user
+ *     description: Deletes the existing user with the given ID and returns the delete user's information.
+ *     security:
+ *        - BearerAuth: []
+ *     tags:
+ *        - Users
+ *     parameters:
+ *        - in: path
+ *          name: id
+ *          required: true
+ *          description: User ID.
+ *          schema:
+ *             type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted the user.
+ *         content:
+ *            application/json:
+ *               schema:
+ *                  type: object
+ *                  properties:
+ *                     result:
+ *                        type: object
+ *                        properties:
+ *                           id:
+ *                              type: uuid
+ *                           username:
+ *                              type: string
+ *                           joined_at:
+ *                              type: timestamp
+ *               example:
+ *                  result:
+ *                     id: '66a0a7e7362f3b1136cbb8f1'
+ *                     username: 'John Doe'
+ *                     joined_at: '1721762939542'
+ *       400:
+ *         description: Malformed request.
+ *       401:
+ *         description: Unauthorized.
+ *       403:
+ *         description: Token is fine but expired or role is not admin.
+ *       404:
+ *         description: User with this ID not found.
+ *       5XX:
+ *         description: Server-side error.
+ */
+router.delete(
+  "/users/:id",
+  authMiddleware,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // check if the given id is a valid object id
+      if (!mongoose.Types.ObjectId.isValid(req.params.id ?? "")) {
+        return res.status(400).json({ message: "Invalid ID." });
+      }
+
+      // delete the user and get the returned value
+      const deletedUser = await User.findByIdAndDelete(req.params.id);
+
+      // if the delete result is null then the document does not exist
+      if (!deletedUser) {
+        return res
+          .status(404)
+          .json({ errors: "User with given ID not found." });
+      }
+
+      res.send({ result: deletedUser });
     } catch (e) {
       next(e);
     }
