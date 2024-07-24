@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import { authMiddleware } from "./middlewares";
 import { User } from "./mongodb";
 import { body, matchedData, validationResult } from "express-validator";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -53,6 +54,8 @@ const router = express.Router();
  *                        items:
  *                           type: object
  *                           properties:
+ *                              _id:
+ *                                 type: string
  *                              username:
  *                                 type: string
  *                              joined_at:
@@ -200,6 +203,70 @@ router.post("/login", (req, res) => {
   jwt.sign(payload, process.env.JWT_SECRET!, (error, data) => {
     res.json({ token: data });
   });
+});
+
+/**
+ * @openapi
+ * /api/v1/users/{id}:
+ *   get:
+ *     summary: Get a list of all users
+ *     description: Returns an object containing information for the user with the given ID.
+ *     tags:
+ *        - Users
+ *     parameters:
+ *        - in: path
+ *          name: id
+ *          required: true
+ *          description: User ID.
+ *          schema:
+ *             type: string
+ *     responses:
+ *       200:
+ *         description: An object containing user information.
+ *         content:
+ *            application/json:
+ *               schema:
+ *                  type: object
+ *                  properties:
+ *                     result:
+ *                        type: object
+ *                        properties:
+ *                           _id:
+ *                              type: string
+ *                           username:
+ *                              type: string
+ *                           joined_at:
+ *                              type: datetime
+ *               example:
+ *                  result:
+ *                     _id: 66a0a7e7362f3b1136cbb8f1
+ *                     username: 'John Doe'
+ *                     joined_at: '2024-07-24T07:06:15.012Z'
+ *       400:
+ *         description: Invalid ID.
+ *       404:
+ *         description: User with given ID not found.
+ *       5XX:
+ *         description: Server-side error.
+ */
+router.get("/users/:id", async (req, res, next) => {
+  try {
+    // check if the given id is a valid object id
+    if (!mongoose.Types.ObjectId.isValid(req.params.id ?? "")) {
+      return res.status(400).json({ message: "Invalid ID." });
+    }
+
+    const result = await User.findById(req.params.id);
+
+    // if result is null that means there is no user with this id
+    if (!result) {
+      return res.status(404).json({ message: "No user with this ID found." });
+    }
+
+    res.json({ result });
+  } catch (e) {
+    next(e);
+  }
 });
 
 export default router;
