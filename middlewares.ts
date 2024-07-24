@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { Payload } from "./types";
+import type { MongoError } from "mongodb";
 
 // checks the jwt token passed in the authorization header
 export function authMiddleware(
@@ -37,4 +38,20 @@ export function authMiddleware(
 
     next();
   });
+}
+
+// this middleware handles errors gracefully, logging the request and error and returning appropriate messages
+export function errorMiddleware(
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  console.error(req, err);
+  if (err.name === "MongoServerError" && (err as MongoError).code === 11000) {
+    return res
+      .status(409)
+      .json({ message: "A user with this name already exists." });
+  }
+  res.status(500).json({ message: "Something went wrong." });
 }
