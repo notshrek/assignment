@@ -13,3 +13,6 @@ As an example the following values can be set:
 JWT_SECRET=123
 MONGODB_URL=mongodb://127.0.0.1:27017/test
 ```
+Then run ```npm start``` to start the server which listens on ```http://localhost:3000``` by default.
+
+You can access the Swagger OpenAPI specification at ```http://localhost:3000/docs```.
